@@ -34,6 +34,5 @@ async def read_root(request: Request):
     return {"Hello": "World"}
 
 @app.get("/items/{item_id}")
-@limiter.limit("10/minute")
 async def read_item(request: Request, item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
