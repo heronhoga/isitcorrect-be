@@ -1,5 +1,6 @@
+from json import JSONDecodeError
+
 from fastapi import FastAPI, Request
-from config import settings
 from starlette.responses import JSONResponse
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -7,32 +8,121 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-# rate limit
+from config import settings
+
+from model import HFClient, GrammarModel
+
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["5/minute"]
 )
 
 app = FastAPI()
+
 app.state.limiter = limiter
 
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
+
 app.add_middleware(SlowAPIMiddleware)
 
+client = HFClient(
+    hf_access_token=settings.hf_access_token
+)
+
+model = GrammarModel(client)
+
+# middleware
 @app.middleware("http")
 async def check_app_key(request: Request, call_next):
+
     app_key = request.headers.get("X-APP-KEY")
+
     if app_key != settings.app_key:
         return JSONResponse(
             status_code=401,
-            content={"error": "Unauthorized"}
+            content={
+                "error": "Unauthorized"
+            }
         )
+
     return await call_next(request)
 
+# routes
 @app.get("/")
-async def read_root(request: Request):
-    return {"Hello": "World"}
+async def read_root():
 
-@app.get("/items/{item_id}")
-async def read_item(request: Request, item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+    return {
+        "message": "Grammar API is running"
+    }
+
+
+@app.post("/check")
+@limiter.limit("5/minute")
+async def check_grammar(request: Request):
+
+    content_type = request.headers.get(
+        "content-type",
+        ""
+    )
+
+    if "application/json" not in content_type:
+
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": (
+                    "Content-Type must be application/json"
+                )
+            }
+        )
+
+    try:
+
+        data = await request.json()
+
+    except JSONDecodeError:
+
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "Invalid JSON body"
+            }
+        )
+
+    text = data.get("text")
+
+    if not text:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "Missing 'text' field"
+            }
+        )
+
+    if not isinstance(text, str):
+
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "'text' must be a string"
+            }
+        )
+
+    try:
+        result = model.check(text)
+        return JSONResponse(
+            status_code=200,
+            content=result
+        )
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "Inference failed",
+                "details": str(e)
+            }
+        )
