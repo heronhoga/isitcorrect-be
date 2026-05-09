@@ -9,6 +9,7 @@ def format_prompt(text: str) -> str:
         - No conversation
         - No extra text
         - No code block
+        - No language other than English
 
         JSON schema:
         {{
@@ -20,6 +21,11 @@ def format_prompt(text: str) -> str:
             "reason": "string"
             }}
         ]
+        }}
+        
+        if language != English, return error:
+        {{
+            "error": "Only English text is supported"
         }}
 
         Input:
