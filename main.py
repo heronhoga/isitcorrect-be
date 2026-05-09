@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -18,6 +19,18 @@ limiter = Limiter(
 )
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.state.limiter = limiter
 
