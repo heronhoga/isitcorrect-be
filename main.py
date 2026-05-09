@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from config import settings
-
+from util import is_english
 from model import HFClient, GrammarModel
 
 limiter = Limiter(
@@ -111,6 +111,15 @@ async def check_grammar(request: Request):
             }
         )
 
+    if not is_english(text):
+
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "Only English text is supported"
+            }
+        )
+        
     try:
         result = model.check(text)
         return JSONResponse(

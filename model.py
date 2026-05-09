@@ -1,4 +1,3 @@
-import json
 from huggingface_hub import InferenceClient
 from prompt import format_prompt
 from util import parse_raw_response
