@@ -1,11 +1,4 @@
 import json
-import langdetect
-
-def is_english(text) -> bool:
-    try:
-        return langdetect.detect(text) == "en"
-    except langdetect.lang_detect_exception.LangDetectException:
-        return False
     
 def parse_raw_response(raw: str):
         try:

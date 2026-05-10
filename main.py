@@ -10,7 +10,6 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from config import settings
-from util import is_english
 from model import HFClient, GrammarModel
 
 limiter = Limiter(
@@ -87,20 +86,16 @@ async def check_grammar(request: Request):
         )
 
     try:
-
         data = await request.json()
-
     except JSONDecodeError:
-
         return JSONResponse(
             status_code=400,
             content={
                 "error": "Invalid JSON body"
             }
         )
-
     text = data.get("text")
-
+    
     if not text:
         return JSONResponse(
             status_code=400,
@@ -108,22 +103,12 @@ async def check_grammar(request: Request):
                 "error": "Missing 'text' field"
             }
         )
-
+        
     if not isinstance(text, str):
-
         return JSONResponse(
             status_code=400,
             content={
                 "error": "'text' must be a string"
-            }
-        )
-
-    if not is_english(text):
-
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": "Only English text is supported"
             }
         )
         
@@ -133,7 +118,6 @@ async def check_grammar(request: Request):
             status_code=200,
             content=result
         )
-
     except Exception as e:
         return JSONResponse(
             status_code=500,
