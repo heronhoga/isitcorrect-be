@@ -50,6 +50,8 @@ model = GrammarModel(client)
 # middleware
 @app.middleware("http")
 async def check_app_key(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return await call_next(request)
 
     app_key = request.headers.get("X-APP-KEY")
 
@@ -64,14 +66,6 @@ async def check_app_key(request: Request, call_next):
     return await call_next(request)
 
 # routes
-@app.get("/")
-async def read_root():
-
-    return {
-        "message": "Grammar API is running"
-    }
-
-
 @app.post("/check")
 @limiter.limit("5/minute")
 async def check_grammar(request: Request):
