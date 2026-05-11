@@ -11,6 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from config import settings
 from model import HFClient, GrammarModel
+from stt import transcribe
 
 limiter = Limiter(
     key_func=get_remote_address,
@@ -66,7 +67,6 @@ async def check_app_key(request: Request, call_next):
 
 # routes
 @app.post("/check")
-@limiter.limit("5/minute")
 async def check_grammar(request: Request):
 
     content_type = request.headers.get(
@@ -126,3 +126,14 @@ async def check_grammar(request: Request):
                 "details": str(e)
             }
         )
+        
+@app.post("/input/mic")
+async def input_mic(request: Request):
+    # testing
+    transcription = transcribe("hello.mp3")
+    return JSONResponse(
+        status_code=200,
+        content={
+            "transcription": transcription
+        }
+    )
