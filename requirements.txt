@@ -1,11 +1,11 @@
---index-url https://download.pytorch.org/whl/cpu
-
 fastapi
 uvicorn[standard]
 python-dotenv
 httpx
 slowapi
 transformers
-torch
 huggingface_hub
 gunicorn
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
