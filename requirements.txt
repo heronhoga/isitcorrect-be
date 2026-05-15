@@ -5,6 +5,7 @@ httpx
 slowapi
 transformers
 huggingface_hub
+pydantic-settings
 gunicorn
 
 --extra-index-url https://download.pytorch.org/whl/cpu
