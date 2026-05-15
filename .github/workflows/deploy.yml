@@ -27,9 +27,25 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/isitcorrect-backend:latest .
+            -t ghcr.io/${{ github.repository_owner }}/isitcorrect-backend:latest \
+            -t ghcr.io/${{ github.repository_owner }}/isitcorrect-backend:${{ github.sha }} .
 
-      - name: Push Docker image
+      - name: Push Docker images
         run: |
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/isitcorrect-backend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/isitcorrect-backend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/isitcorrect-backend:${{ github.sha }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /opt/isitcorrect
+
+            docker compose pull backend
+
+            docker compose up -d backend
+
+            docker image prune -af
