@@ -19,6 +19,13 @@ limiter = Limiter(
 
 app = FastAPI()
 
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
+
 origins = [
     "http://localhost:5173",
     "https://isitcorrect.afrinata.com"
@@ -29,14 +36,7 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.state.limiter = limiter
-
-app.add_exception_handler(
-    RateLimitExceeded,
-    _rate_limit_exceeded_handler
+    allow_headers=["*", "X-APP-KEY"],
 )
 
 app.add_middleware(SlowAPIMiddleware)
