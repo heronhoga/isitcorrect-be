@@ -26,6 +26,8 @@ app.add_exception_handler(
     _rate_limit_exceeded_handler
 )
 
+app.add_middleware(SlowAPIMiddleware)
+
 origins = [
     "http://localhost:5173",
     "https://isitcorrect.afrinata.com"
@@ -38,8 +40,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*", "X-APP-KEY"],
 )
-
-app.add_middleware(SlowAPIMiddleware)
 
 client = HFClient(
     hf_access_token=settings.hf_access_token
