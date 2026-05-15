@@ -21,6 +21,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
+    "https://isitcorrect.afrinata.com"
 ]
 
 app.add_middleware(
