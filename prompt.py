@@ -9,6 +9,18 @@ def format_prompt(text: str) -> str:
         - No conversation
         - No extra text
         - No code block
+        - No apologies
+        - No disclaimers
+        - No notes
+        - No comments
+        - No formatting
+        - No lists
+        - No emojis
+        - No special characters
+        - No line breaks
+        - No whitespace
+        - No indentation
+        - No Greetings
 
         JSON schema:
         {{
